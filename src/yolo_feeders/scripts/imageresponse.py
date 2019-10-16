@@ -23,8 +23,8 @@ OUTPUT_IMAGE_DIR = fp + '/../../output_images/'
 OUTPUT_BOUND_DIR = fp + '/../../output_bounds/'
 
 # Configuration
-#INPUT_IMAGE_TOPIC = 'darknet_ros/detection_image'
-INPUT_IMAGE_TOPIC = 'camera/rgb/image_raw'
+INPUT_IMAGE_TOPIC = 'darknet_ros/detection_image'
+#INPUT_IMAGE_TOPIC = 'camera/rgb/image_raw'
 INPUT_BOUND_TOPIC = '/'
 NODE_NAME = 'image_response'
 

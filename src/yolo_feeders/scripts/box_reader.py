@@ -22,7 +22,7 @@ OUTPUT_BOUND_DIR = fp + '/../../output_bounds/'
 START_TIME = str(int(time.time()))
 
 # Configuration
-INPUT_BOX_TOPIC = 'yolo_transform/transformed_bounding_boxes'
+INPUT_BOX_TOPIC = 'darknet_ros/bounding_boxes'
 OUTPUT_FILENAME_SUM = START_TIME + '_Summary.csv'
 OUTPUT_FILE_SUM = None
 OUTPUT_FILENAME_DET = START_TIME + '_Detailed.csv'
@@ -43,16 +43,16 @@ def bounds_callback(data):
         # Update the last frame we saw
         last_frame = frame_num
         # Build lists of object class and corresponding probability
-        objects_detected = [i.Class for i in data.bounding_boxes]
-        objects_probability = [i.probability for i in data.bounding_boxes]
+        # objects_detected = [i.Class for i in data.bounding_boxes]
+        # objects_probability = [i.probability for i in data.bounding_boxes]
         # Calculate the number of objects detected and average probability
-        num_objects_detected = len(objects_detected)
-        avg_objects_probability = sum(objects_probability)/num_objects_detected if num_objects_detected > 0  else 0
+        # num_objects_detected = len(objects_detected)
+        # avg_objects_probability = sum(objects_probability)/num_objects_detected if num_objects_detected > 0  else 0
         # Summarised output
-        OUTPUT_FILE_SUM.writerow([frame_num, num_objects_detected, avg_objects_probability])
+        # OUTPUT_FILE_SUM.writerow([frame_num, num_objects_detected, avg_objects_probability])
         # Detailed output
-        for i in range(num_objects_detected):
-            OUTPUT_FILE_DET.writerow([frame_num, objects_detected[i], objects_probability[i]])
+        for box in data.bounding_boxes:
+            OUTPUT_FILE_DET.writerow([frame_num, box.Class, box.probability, box.xmin,box.ymin, box.xmax,box.ymax])
     return
 
 def argument_parser():
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     OUTPUT_FILE_SUM = csv.writer(open(OUTPUT_BOUND_DIR+OUTPUT_FILENAME_SUM, 'w'), delimiter=',')
     OUTPUT_FILE_SUM.writerow(['SEQUENCE_NO', 'OBJECTS_DETECTED', 'AVERAGE_PROB'])
     OUTPUT_FILE_DET = csv.writer(open(OUTPUT_BOUND_DIR+OUTPUT_FILENAME_DET, 'w'), delimiter=',')
-    OUTPUT_FILE_DET.writerow(['SEQUENCE_NO', 'OBJECT', 'PROBABILITY'])
+    OUTPUT_FILE_DET.writerow(['SEQUENCE_NO', 'OBJECT', 'PROBABILITY', 'MIN_X', 'MIN_Y', 'MAX_X', 'MAX_Y'])
 
     # Create the node
     response()
