@@ -28,16 +28,25 @@ INPUT_IMAGE_TOPIC = 'darknet_ros/detection_image'
 INPUT_BOUND_TOPIC = '/'
 NODE_NAME = 'image_response'
 
+# Variables
+# Don't want to write out the same original ROSBAG message twice, keep track of the last
+last_frame = -1
+
 def images_callback(data):
-    print '\nImage received'
-    # Create a CvBridge instance to convert
-    bridge = CvBridge()
-    # Take the sensor_msgs Image and convert back to cv2
-    cv_image = bridge.imgmsg_to_cv2(data)
-    # Save the file to the output directory. Give system time as filename
-    filename = str(int(time.time())) + '.png'
-    cv2.imwrite(OUTPUT_IMAGE_DIR + filename, cv_image)
-    print 'Image saved as ' + filename
+    global last_frame
+    # Obtain the sequence number
+    frame_num = data.image_header.seq
+    if frame_num > last_frame:
+        last_frame = frame_num
+        print '\n New Image received'
+        # Create a CvBridge instance to convert
+        bridge = CvBridge()
+        # Take the sensor_msgs Image and convert back to cv2
+        cv_image = bridge.imgmsg_to_cv2(data)
+        # Save the file to the output directory. Give system time as filename
+        filename = str(int(time.time())) + '.png'
+        cv2.imwrite(OUTPUT_IMAGE_DIR + filename, cv_image)
+        print 'Image saved as ' + filename
 
 def bounds_callback(data):
     return

@@ -6,3 +6,4 @@ input_images/*
 output_bounds/*
 output_images/*
 processed_images/*
+.idea/
