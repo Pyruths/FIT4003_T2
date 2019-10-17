@@ -35,7 +35,7 @@ last_frame = -1
 def images_callback(data):
     global last_frame
     # Obtain the sequence number
-    frame_num = data.image_header.seq
+    frame_num = data.header.seq
     if frame_num > last_frame:
         last_frame = frame_num
         print '\n New Image received'
