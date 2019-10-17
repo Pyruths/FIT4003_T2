@@ -29,15 +29,15 @@ INPUT_BOUND_TOPIC = '/'
 NODE_NAME = 'image_response'
 
 # Variables
-# Don't want to write out the same original ROSBAG message twice, keep track of the last
-last_frame = -1
+# Don't want to write out the same image twice, keep track of the last
+last_frame = ''
 
 def images_callback(data):
     global last_frame
-    # Obtain the sequence number
-    frame_num = data.header.seq
-    if frame_num > last_frame:
-        last_frame = frame_num
+    # Sequence number keeps updating, so use image
+    image_data = data.data
+    if image_data != last_frame:
+        last_frame = image_data
         print '\n New Image received'
         # Create a CvBridge instance to convert
         bridge = CvBridge()
