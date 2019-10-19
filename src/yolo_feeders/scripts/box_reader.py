@@ -44,7 +44,6 @@ def bounds_callback(data):
         # Build lists of object class and corresponding probability
         for box in data.bounding_boxes:
             OUTPUT_FILE_DET.writerow([frame_num, box.Class, box.probability, box.xmin,box.ymin, box.xmax,box.ymax])
-        OUTPUT_FILE_DET.flush() # flush file after every message to ensure all are written.
     return
 
 def argument_parser():
