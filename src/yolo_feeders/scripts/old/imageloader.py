@@ -7,7 +7,7 @@
 # Options: filter (optional),
 
 # Created: 22/09/19 - Dustin Haines
-# Last Modified: 02/10/19 - Andrew Bui
+# Last Modified: 19/10/19 - Robin Phoeng
 
 import sys
 import os
@@ -26,13 +26,11 @@ PROCESSED_DIR = fp + '/../../processed_images/'
 # Configuration
 VAL_EXTENSIONS = ['png', 'jpg']
 OUTPUT_TOPIC = 'camera/rgb/image_raw'
-OUTPUT_FILTER_TOPIC = 'apply_filters'
 NODE_NAME = 'image_loader'
 QUERY_RATE = 5.0
 
 def findImage():
 	# Create publishers
-	filterPub = rospy.Publisher(OUTPUT_FILTER_TOPIC, Image, queue_size=1)
 	pub = rospy.Publisher(OUTPUT_TOPIC, Image, queue_size=1)
 	# Create an anonymous node to avoid any potential conflict
 	rospy.init_node(NODE_NAME, anonymous=True)
@@ -60,16 +58,9 @@ def findImage():
 				# Transform into the message
 				yolo_image = bridge.cv2_to_imgmsg(first_file)
 				yolo_image.encoding = 'bgr8'
-				# Checks if arguments are specified
-				if len(sys.argv) == 2:
-					# Check if filter argument is specified
-					if sys.argv[1] == 'filter':
-						# Publish to apply_filters node
-						filterPub.publish(yolo_image); 
-				else:             
-					# Publish the message
-					pub.publish(yolo_image)
-					#print('Image posted to topic /' + OUTPUT_TOPIC)
+				yolo_image.header.frame_id = first_file_name
+				# Publish the message
+				pub.publish(yolo_image)
 			except CvBridgeError as err:
 				print(err)
 			# Move the processed image
