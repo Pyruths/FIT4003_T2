@@ -38,7 +38,7 @@ def bounds_callback(data):
     
     # Verify we haven't already recorded the interpretation of the frame
     if frame_num != last_frame:
-        print '\n New Frame Recieved'
+        print '\n New Frame Recieved :' + frame_num
         # Update the last frame we saw
         last_frame = frame_num
         # Build lists of object class and corresponding probability
