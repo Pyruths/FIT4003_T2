@@ -42,8 +42,7 @@ OUTPUT_TOPIC = 'camera/rgb/image_raw'
 INPUT_BOX_TOPIC = 'darknet_ros/bounding_boxes'
 OUTPUT_FILENAME_DET = START_TIME + '_Detailed.csv'
 OUTPUT_FILE_DET = None
-NODE_NAME_READER = 'box_reader'
-NODE_NAME_WRITER = 'image_loader'
+NODE_NAME = 'image_loader'
 queue_size = 1
 queue_counter = 0
 
@@ -55,8 +54,6 @@ def setup_publisher():
     global queue_counter
     # Create publishers
     pub = rospy.Publisher(OUTPUT_TOPIC, Image, queue_size=queue_size)
-    # Create an anonymous node to avoid any potential conflict
-    rospy.init_node(NODE_NAME_WRITER, anonymous=True)
     # Set the rate at which the query is run (in Hz)
     # 1 query a second currently, YOLO should process quicker than this
     # but varies based on hardware
@@ -68,7 +65,7 @@ def setup_publisher():
     while not rospy.is_shutdown():
         # if there is a free buffer slot
         if queue_counter >= 0:
-            print '\nQuerying for images'
+            print('\nQuerying for images')
             # Query the directory
             dir_contents = os.listdir(IMAGE_DIR)
             # Only do processing if there is an image to process
@@ -78,7 +75,7 @@ def setup_publisher():
                 # Open the first file
                 file_name = dir_contents[0]
                 file = cv2.imread((IMAGE_DIR + file_name), -1)
-                print 'Image found (' + file_name + '), processing'
+                print('Image found (' + file_name + '), processing')
                 try:
                     # Transform into the message
                     yolo_image = bridge.cv2_to_imgmsg(file)
@@ -93,9 +90,10 @@ def setup_publisher():
                 os.rename((IMAGE_DIR + file_name), (PROCESSED_DIR + file_name))
                 print(file_name + ' moved to ' + PROCESSED_DIR)
             else:
-                print 'No images found, sleeping...'
+                print('No images found, sleeping...')
         # Sleep for next iteration
         rospy.sleep(QUERY_RATE)
+
 
 def bounds_callback(data):
     global last_frame
@@ -105,8 +103,7 @@ def bounds_callback(data):
 
     # Verify we haven't already recorded the interpretation of the frame
     if frame_num != last_frame:
-        print
-        '\n New Frame Recieved :' + frame_num
+        print('\n New Frame Recieved :' + frame_num)
         # Update the last frame we saw
         last_frame = frame_num
         # Build lists of object class and corresponding probability
@@ -115,36 +112,19 @@ def bounds_callback(data):
         queue_counter += 1
     return
 
+
 def setup_subscriber():
-    # Initialise the node
-    rospy.init_node(NODE_NAME_READER, anonymous=True)
     # Subscribe to topics, specifying the data type and callback function
     rospy.Subscriber(INPUT_BOX_TOPIC, BoundingBoxes, bounds_callback)
-    print
-    'Listener to /' + INPUT_BOX_TOPIC + ' created'
-    print
-    'Writing to files with prefix: ' + START_TIME
+    print('Listener to /' + INPUT_BOX_TOPIC + ' created')
+    print('Writing to files with prefix: ' + START_TIME)
 
-    # Keeps the listener alive
-    rospy.spin()
-
-def argument_parser():
-    parser = argparse.ArgumentParser()
-    # Specify all possible command line arguments
-    parser.add_argument('-ib', '--input_box_topic')
-    parser.add_argument('-od', '--output_file_det')
-    return parser
 
 if __name__ == '__main__':
-    # Parse CLI arguments
-    parser = argument_parser()
-    args = parser.parse_args()
-    # Update configuration if required
-    INPUT_BOX_TOPIC = args.input_box_topic if args.input_box_topic else INPUT_BOX_TOPIC
-    OUTPUT_FILENAME_DET = args.output_file_det if args.output_file_det else OUTPUT_FILENAME_DET
     # Open our csv files
     OUTPUT_FILE_DET = csv.writer(open(OUTPUT_BOUND_DIR + OUTPUT_FILENAME_DET, 'w'), delimiter=',')
     OUTPUT_FILE_DET.writerow(['FILE_NAME', 'OBJECT', 'PROBABILITY', 'MIN_X', 'MIN_Y', 'MAX_X', 'MAX_Y'])
+    rospy.init_node(NODE_NAME, anonymous=True)
     # Create the node
     setup_subscriber()
     # run images
