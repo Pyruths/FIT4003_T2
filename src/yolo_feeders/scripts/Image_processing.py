@@ -52,6 +52,7 @@ queue_counter = 0
 last_frame = ''
 
 def setup_publisher():
+    global queue_counter
 	# Create publishers
 	pub = rospy.Publisher(OUTPUT_TOPIC, Image, queue_size=queue_size)
 	# Create an anonymous node to avoid any potential conflict
@@ -85,6 +86,7 @@ def setup_publisher():
                     yolo_image.header.frame_id = file_name
                     # Publish the message
                     pub.publish(yolo_image)
+                    queue_counter -= 1 # increment counter
                 except CvBridgeError as err:
                     print(err)
                 # Move the processed image
@@ -97,6 +99,7 @@ def setup_publisher():
 
 def bounds_callback(data):
     global last_frame
+    global queue_counter
     # Obtain the sequence number
     frame_num = data.image_header.frame_id
 
@@ -109,6 +112,7 @@ def bounds_callback(data):
         # Build lists of object class and corresponding probability
         for box in data.bounding_boxes:
             OUTPUT_FILE_DET.writerow([frame_num, box.Class, box.probability, box.xmin, box.ymin, box.xmax, box.ymax])
+        queue_counter += 1
     return
 
 def setup_subscriber():
