@@ -53,16 +53,16 @@ last_frame = ''
 
 def setup_publisher():
     global queue_counter
-	# Create publishers
+    # Create publishers
 	pub = rospy.Publisher(OUTPUT_TOPIC, Image, queue_size=queue_size)
-	# Create an anonymous node to avoid any potential conflict
+    # Create an anonymous node to avoid any potential conflict
 	rospy.init_node(NODE_NAME_WRITER, anonymous=True)
-	# Set the rate at which the query is run (in Hz)
-	# 1 query a second currently, YOLO should process quicker than this
+    # Set the rate at which the query is run (in Hz)
+    # 1 query a second currently, YOLO should process quicker than this
 	# but varies based on hardware
 	rate = rospy.Rate(1)
-	# Create a bridge instance which will convert out image into the right format
-	bridge = CvBridge()
+    # Create a bridge instance which will convert out image into the right format
+    # bridge = CvBridge()
 
 	# Launch the listener loop
 	while not rospy.is_shutdown():
@@ -94,7 +94,7 @@ def setup_publisher():
                 print(file_name + ' moved to ' + PROCESSED_DIR)
             else:
                 print 'No images found, sleeping...'
-		# Sleep for next iteration
+        # Sleep for next iteration
         rospy.sleep(QUERY_RATE)
 
 def bounds_callback(data):
