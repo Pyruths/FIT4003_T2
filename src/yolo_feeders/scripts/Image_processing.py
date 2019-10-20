@@ -63,17 +63,18 @@ def setup_publisher():
     # Create a bridge instance which will convert out image into the right format
     bridge = CvBridge()
 
+    # get start up contents
+    dir_contents = os.listdir(IMAGE_DIR)
+
+    for item in dir_contents:
+        dir_contents.remove(item) if item.split('.')[-1] not in VAL_EXTENSIONS else None
+    dir_contents.sort()
     # Launch the listener loop
     while not rospy.is_shutdown():
         print('\nProcess')
         # if there is a free buffer slot
         if queue_counter > 0:
             print('\nQuerying for images')
-            # Query the directory
-            dir_contents = os.listdir(IMAGE_DIR)
-            # Only do processing if there is an image to process
-            for item in dir_contents:
-                dir_contents.remove(item) if item.split('.')[-1] not in VAL_EXTENSIONS else None
             if len(dir_contents) > 0:
                 # Open the first file
                 file_name = dir_contents[0]
@@ -95,7 +96,16 @@ def setup_publisher():
                 os.rename((IMAGE_DIR + file_name), (PROCESSED_DIR + file_name))
                 print(file_name + ' moved to ' + PROCESSED_DIR)
             else:
-                print('No images found, sleeping...')
+                # fetch a new list of documents
+                # Query the directory
+                dir_contents = os.listdir(IMAGE_DIR)
+
+                # Only do processing if there is an image to process
+                for item in dir_contents:
+                    dir_contents.remove(item) if item.split('.')[-1] not in VAL_EXTENSIONS else None
+                dir_contents.sort()
+                if (len(dir_contents) < 0):
+                    print('No images found, sleeping...')
         # Sleep for next iteration
         rospy.sleep(QUERY_RATE)
 
