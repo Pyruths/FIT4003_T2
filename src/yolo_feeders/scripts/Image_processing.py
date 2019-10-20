@@ -43,8 +43,9 @@ INPUT_BOX_TOPIC = 'darknet_ros/bounding_boxes'
 OUTPUT_FILENAME_DET = START_TIME + '_Detailed.csv'
 OUTPUT_FILE_DET = None
 NODE_NAME = 'image_loader'
-queue_size = 1
-queue_counter = 1
+queue_size = 2
+queue_counter = 2
+release_delay = 20
 
 lock = Lock()
 
@@ -66,14 +67,17 @@ def setup_publisher():
     # get start up contents
     dir_contents = os.listdir(IMAGE_DIR)
 
+    # release counter, in the event that an image has no objects, a message will not be sent to release the counter
+    last_process = 0
     for item in dir_contents:
         dir_contents.remove(item) if item.split('.')[-1] not in VAL_EXTENSIONS else None
     dir_contents.sort()
     # Launch the listener loop
     while not rospy.is_shutdown():
-        print('\nProcess')
+
         # if there is a free buffer slot
         if queue_counter > 0:
+            last_process = 0
             print('\nQuerying for images')
             if len(dir_contents) > 0:
                 # Open the first file
@@ -106,6 +110,14 @@ def setup_publisher():
                 dir_contents.sort()
                 if (len(dir_contents) < 0):
                     print('No images found, sleeping...')
+        elif last_process >= release_delay:
+            # release a new set of images
+            lock.acquire()
+            queue_counter = queue_size
+            lock.release()
+        else:
+            last_process += 1
+            print('\nProcess')
         # Sleep for next iteration
         rospy.sleep(QUERY_RATE)
 
