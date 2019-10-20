@@ -81,7 +81,7 @@ def setup_publisher():
             print('\nQuerying for images')
             if len(dir_contents) > 0:
                 # Open the first file
-                file_name = dir_contents[0]
+                file_name = dir_contents.pop(0)
                 file = cv2.imread((IMAGE_DIR + file_name), -1)
                 print('Image found (' + file_name + '), processing')
                 try:
