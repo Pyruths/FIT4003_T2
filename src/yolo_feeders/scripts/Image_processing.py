@@ -43,8 +43,8 @@ INPUT_BOX_TOPIC = 'darknet_ros/bounding_boxes'
 OUTPUT_FILENAME_DET = START_TIME + '_Detailed.csv'
 OUTPUT_FILE_DET = None
 NODE_NAME = 'image_loader'
-queue_size = 2
-queue_counter = 2
+queue_size = 1
+queue_counter = 1
 
 lock = Lock()
 
