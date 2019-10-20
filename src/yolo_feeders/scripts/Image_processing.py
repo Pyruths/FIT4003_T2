@@ -43,8 +43,8 @@ INPUT_BOX_TOPIC = 'darknet_ros/bounding_boxes'
 OUTPUT_FILENAME_DET = START_TIME + '_Detailed.csv'
 OUTPUT_FILE_DET = None
 NODE_NAME = 'image_loader'
-queue_size = 1
-queue_counter = 0
+queue_size = 2
+queue_counter = 2
 
 # Variables
 # Don't want to write out the same original ROS message twice, keep track of the last
@@ -64,7 +64,7 @@ def setup_publisher():
     # Launch the listener loop
     while not rospy.is_shutdown():
         # if there is a free buffer slot
-        if queue_counter >= 0:
+        if queue_counter > 0:
             print('\nQuerying for images')
             # Query the directory
             dir_contents = os.listdir(IMAGE_DIR)
