@@ -13,6 +13,8 @@ Feed images to YOLO and listen to bounding box updates. This feeds as many image
 # Last Modified: 19/10/19 - Robin Phoeng
 
 import os
+from threading import Lock
+
 import cv2
 import rospkg
 import rospy
@@ -34,8 +36,6 @@ START_TIME = str(int(time.time()))
 QUERY_RATE = 5.0
 
 
-
-
 # Configuration
 VAL_EXTENSIONS = ['png', 'jpg']
 OUTPUT_TOPIC = 'camera/rgb/image_raw'
@@ -45,6 +45,8 @@ OUTPUT_FILE_DET = None
 NODE_NAME = 'image_loader'
 queue_size = 2
 queue_counter = 2
+
+lock = Lock()
 
 # Variables
 # Don't want to write out the same original ROS message twice, keep track of the last
@@ -63,6 +65,7 @@ def setup_publisher():
 
     # Launch the listener loop
     while not rospy.is_shutdown():
+        print('\nProcess')
         # if there is a free buffer slot
         if queue_counter > 0:
             print('\nQuerying for images')
@@ -83,7 +86,9 @@ def setup_publisher():
                     yolo_image.header.frame_id = file_name
                     # Publish the message
                     pub.publish(yolo_image)
+                    lock.acquire()
                     queue_counter -= 1 # increment counter
+                    lock.release()
                 except CvBridgeError as err:
                     print(err)
                 # Move the processed image
@@ -109,7 +114,9 @@ def bounds_callback(data):
         # Build lists of object class and corresponding probability
         for box in data.bounding_boxes:
             OUTPUT_FILE_DET.writerow([frame_num, box.Class, box.probability, box.xmin, box.ymin, box.xmax, box.ymax])
+        lock.acquire()
         queue_counter += 1
+        lock.release()
     return
 
 
